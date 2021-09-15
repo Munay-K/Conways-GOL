@@ -6,7 +6,7 @@
 
 class Generation {
 public:
-  Generation(World wld, int gen) : world(wld) {
+  Generation(World wld, int gen) : m_world(wld) {
     m_stats[0] = gen;
     m_stats[1] = wld.get_alive();
     m_stats[2] = wld.get_died();
@@ -21,7 +21,7 @@ public:
   }
 
 private:
-  World world;
+  World m_world;
   int m_stats[4]{}; // number,alive, died, born
 };
 

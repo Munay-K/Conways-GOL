@@ -24,65 +24,83 @@ public:
     bool value;
     int x, y;
     m_grid.resize(m_height, std::vector<bool>(m_width, false));
+
     if (randomize == true) {
+      m_alive = starting_cells;
       while (starting_cells > 0) {
         y = random() % m_height;
         x = random() % m_width;
         m_grid[y][x] = 1;
         starting_cells--;
       }
-    } else {
+    } else if (starting_cells > 0) {
+      std::cout
+          << "\003[1;31mWARNING:\033[0mBad usage of random world generator";
+    }
+  }
+
+  World(int h, int w, bool randomize) : m_height(h), m_width(w) {
+    bool value;
+
+    if (randomize == true) {
+      m_grid.resize(m_height, std::vector<bool>());
+
       for (int y = 0; y < m_height; ++y) {
         for (int x = 0; x < m_width; ++x) {
-          std::cout << "cell [" << x << "][" << y << "] value :";
-          std::cin >> value;
-          m_grid[y][x] = value;
+          value = random() % 2;
+          m_grid[y].push_back(value);
         }
       }
+    } else {
+      m_grid.resize(m_height, std::vector<bool>(m_width, false));
     }
   }
 
   void evolve() {
-    update_stats('e');
+    update_stats(3);
     for (int y = 0; y < m_height; ++y) {
       for (int x = 0; x < m_width; ++x) {
-        auto neightbors = count_neightbors(m_grid, x, y);
+        auto neightbors = count_neightbors(y, x);
         auto cell = m_grid[y][x];
         if (cell == true && (neightbors < 2 || neightbors > 3)) {
           cell = false;
-          update_stats('d');
+          update_stats(1);
         } else if (cell == false && neightbors == 3) {
           cell = true;
-          update_stats('b');
+          update_stats(2);
         }
       }
     }
   }
 
-  void update_stats(char option) {
+  void add_life(int h, int w) { m_grid[h][w] = true; }
+
+  void update_stats(short option) {
+    switch (option) {
     // cell died
-    if (option == 'd') {
+    case 1: {
       m_died++;
       m_alive--;
     }
     // cell born
-    if (option == 'b') {
+    case 2: {
       m_alive++;
       m_born++;
     }
     // new generation evolving
-    if (option == 'e') {
+    case 3: {
       m_died = 0;
       m_born = 0;
     }
+    }
   }
 
-  int count_neightbors(std::vector<std::vector<bool>> grid, int x, int y) {
+  int count_neightbors(int y, int x) {
     int counter = 0;
     for (int i = -1; i < 2; ++i) {
       for (int j = -1; j < 2; ++j) {
-        int row = (x + i + m_height) % m_height;
-        int col = (y + j + m_width) % m_width;
+        int row = (y + i + m_height) % m_height;
+        int col = (x + j + m_width) % m_width;
         counter += m_grid[col][row];
       }
     }
