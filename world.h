@@ -48,6 +48,7 @@ public:
       for (int y = 0; y < m_height; ++y) {
         for (int x = 0; x < m_width; ++x) {
           value = random() % 2;
+		  m_alive += value;
           m_grid[y].push_back(value);
         }
       }
@@ -58,10 +59,11 @@ public:
 
   void evolve() {
     update_stats(3);
+    auto tmp_grid = m_grid;
     for (int y = 0; y < m_height; ++y) {
       for (int x = 0; x < m_width; ++x) {
         auto neightbors = count_neightbors(y, x);
-        auto cell = m_grid[y][x];
+        auto cell = tmp_grid[y][x];
         if (cell == true && (neightbors < 2 || neightbors > 3)) {
           cell = false;
           update_stats(1);
@@ -71,6 +73,7 @@ public:
         }
       }
     }
+    m_grid = tmp_grid;
   }
 
   void add_life(int h, int w) { m_grid[h][w] = true; }
@@ -81,16 +84,19 @@ public:
     case 1: {
       m_died++;
       m_alive--;
+	  break;
     }
     // cell born
     case 2: {
       m_alive++;
       m_born++;
+	  break;
     }
     // new generation evolving
     case 3: {
       m_died = 0;
       m_born = 0;
+	  break;
     }
     }
   }
@@ -101,13 +107,14 @@ public:
       for (int j = -1; j < 2; ++j) {
         int row = (y + i + m_height) % m_height;
         int col = (x + j + m_width) % m_width;
-        counter += m_grid[col][row];
+        counter += m_grid[row][col];
       }
     }
+    counter -= m_grid[y][x];
     return counter;
   }
 
-  void print() {
+  void print_grid() {
     for (auto row : m_grid) {
       for (auto cell : row) {
         if (cell == true) {
@@ -118,6 +125,18 @@ public:
       }
       std::cout << '\n';
     }
+  }
+
+  void print_stats() {
+    std::cout << "Cells Alive: " << m_alive << '\n';
+    std::cout << "Total died: " << m_died << '\n';
+    std::cout << "Total born: " << m_born << '\n';
+    std::cout << '\n';
+  }
+
+  void print() {
+    print_grid();
+    print_stats();
   }
 
   int get_alive() { return m_alive; }

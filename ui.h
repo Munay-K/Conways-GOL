@@ -3,7 +3,9 @@
 
 #include "simulation.h"
 #include "world.h"
+#include <chrono>
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -56,13 +58,13 @@ private:
     bool is_running = true;
     short chosen_option;
     while (is_running) {
-      m_sim->run_step();
-
+      system("clear");
       std::cout << "\nContinue(1), Save Gen(2), Quit(3):  ";
       std::cin >> chosen_option;
 
       switch (chosen_option) {
       case 1: {
+        m_sim->run_step();
         break;
       }
       case 2: {
@@ -81,8 +83,9 @@ private:
     short chosen_option;
     bool is_running = true;
     while (is_running) {
+      system("clear");
       m_sim->run_step();
-      sleep(0.3);
+      std::this_thread::sleep_for(std::chrono::milliseconds(800));
     }
   }
 
@@ -120,6 +123,10 @@ private:
   int width = 0;
 
   void create_world() {
+    std::string input;
+    std::string values[2]{};
+    int pos = 0;
+
     if (m_world != NULL) {
       char is_continue;
       std::cout << "\003[1;31m WARNING: \033[0m Current World will be destroy, "
@@ -131,8 +138,19 @@ private:
     }
 
     std::cout << "Specify size \"Y,X\": ";
-    std::cin >> height;
-    width = height;
+    std::cin >> input;
+    std::cout << "input: " << input << '\n';
+
+    for (auto character : input) {
+      if (character != ',' && character != '\n') {
+        values[pos] += character;
+      } else {
+        pos++;
+      }
+    }
+
+    height = std::stoi(values[0]);
+    width = std::stoi(values[1]);
 
     options = {"Defined alive cells", "Completly Random",
                "Random with X cells alive", "Quit"};
@@ -196,6 +214,7 @@ private:
           temp += character;
         } else {
           values[pos] = std::stoi(temp);
+          temp = "";
           pos++;
         }
       }

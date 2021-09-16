@@ -5,12 +5,22 @@
 #include <iostream>
 
 class Generation {
+private:
+  World m_world;
+  int m_stats[4]{}; // number,alive, died, born
+
 public:
   Generation(World wld, int gen) : m_world(wld) {
     m_stats[0] = gen;
     m_stats[1] = wld.get_alive();
     m_stats[2] = wld.get_died();
     m_stats[3] = wld.get_born();
+  }
+
+  void update_stats(World *wld) {
+    m_stats[1] = wld->get_alive();
+    m_stats[2] = wld->get_died();
+    m_stats[3] = wld->get_born();
   }
 
   void print() {
@@ -20,9 +30,7 @@ public:
     std::cout << "Total born: " << m_stats[3] << '\n';
   }
 
-private:
-  World m_world;
-  int m_stats[4]{}; // number,alive, died, born
+  World get_world() { return m_world; }
 };
 
 #endif
